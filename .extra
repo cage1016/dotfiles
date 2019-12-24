@@ -1,0 +1,213 @@
+#https://kubernetes.io/docs/tasks/tools/install-kubectl/
+[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
+# export BASH_COMPLETION_COMPAT_DIR="/usr/local/etc/bash_completion.d"
+
+# autojump
+# https://github.com/wting/autojump, brew install autojump
+[[ -f "/usr/local/etc/profile.d/autojump.sh" ]] && source "/usr/local/etc/profile.d/autojump.sh"
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/cage/google-cloud-sdk/path.bash.inc' ]; then . '/Users/cage/google-cloud-sdk/path.bash.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/cage/google-cloud-sdk/completion.bash.inc' ]; then . '/Users/cage/google-cloud-sdk/completion.bash.inc'; fi
+
+test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
+
+[[ -s "/Users/cage/.gvm/scripts/gvm" ]] && source "/Users/cage/.gvm/scripts/gvm"
+
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+
+#------------------------------------------------------------------------------
+# alisas
+source <(kubectl completion bash)
+alias k=kubectl
+complete -F __start_kubectl k
+
+source /usr/local/Cellar/git/2.24.1/etc/bash_completion.d/git-completion.bash
+source /usr/local/Cellar/git/2.24.1/etc/bash_completion.d/git-prompt.sh
+
+source <(helm completion bash)
+
+#https://github.com/golangci/golangci-lint#quick-start
+source <(golangci-lint completion bash)
+
+# Reload the shell (i.e. invoke as a login shell)
+alias reload="exec $SHELL -l"
+
+#--------
+# Docker shortcuts
+# fork form https://github.com/tcnksm/docker-alias/blob/master/zshrc
+# Get latest container ID
+alias dl="docker ps -l -q"
+
+# Get container process
+alias dps="docker ps"
+
+# Get process included stop container
+alias dpa="docker ps -a"
+
+# Get images
+alias di="docker images"
+
+# Get images by image size
+alias dir="docker images | sort -k7 -h"
+
+# Get container IP
+alias dip="docker inspect --format '{{ .NetworkSettings.IPAddress }}'"
+
+# Run deamonized container, e.g., $dkd base /bin/echo hello
+alias dkd="docker run -d -P"
+
+# Run interactive container, e.g., $dki base /bin/bash
+alias dki="docker run -i -t -P"
+
+# Execute interactive container, e.g., $dex base /bin/bash
+alias dex="docker exec -i -t"
+
+# Stop and Remove all containers
+alias drmf="docker stop $(docker ps -a -q) && docker rm $(docker ps -a -q)"
+
+# Remove none docker images
+alias drmin='docker rmi -f $(docker images | grep "^<none>" | awk "{print $3}")'
+
+#--------
+# List all files colorized in long format
+alias l="ls -lF ${colorflag}"
+
+# List all colorized in long format and order by date
+alias lt="ls -lFt ${colorflag}"
+alias ltr="ls -lhtr ${colorflag}"
+
+# List all files colorized in long format, including dot files
+alias la="ls -laF ${colorflag}"
+alias lat="ls -Alht ${colorflag}"
+alias latr="ls -Alhtr ${colorflag}"
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# functions
+
+# https://gist.github.com/wesbos/1432b08749e3cd2aea22fcea2628e2ed
+# Put this in your .zshrc or .bashrc file
+# Install `tree` first — brew install tree
+function t() {
+  # Defaults to 3 levels deep, do more with `t 5` or `t 1`
+  # pass additional args after
+  tree -I '.git|node_modules|bower_components|.DS_Store' --dirsfirst --filelimit 300 -L ${1:-3} -aC $2
+}
+
+#https://gist.github.com/cage1016/abf5f6ef3f35fd604f9e
+#!/usr/bin/env bash
+# [How to use Google App Engine with virtualenv | Vita Smid ~ Zephyrus | 
+#   Mathematics, philosophy, code, travel and everything in between.](http://ze.phyr.us/appengine-virtualenv/)
+# virtualenv pip package link helper
+# rm -rf gaenv
+# linkenv $VIRTUAL_ENV/lib/python2.7/site-packages gaenv
+link_pip(){
+	# Default linker foler
+	DEFAULT_LINK_FOLDER=gaenv
+
+	if [[ $# -eq 0 ]]
+	then
+	  LIB=$DEFAULT_LINK_FOLDER
+	else
+	  LIB=$1
+	fi
+
+	# relink
+	rm -rf $DEFAULT_LINK_FOLDER
+	rm -rf $LIB
+	linkenv $VIRTUAL_ENV/lib/python2.7/site-packages $LIB
+}
+
+#------
+# 先安裝sshpass
+# $ brew install https://raw.githubusercontent.com/kadwanev/bigboybrew/master/Library/Formula/sshpass.rb
+function nas_scp() {
+	FILE=$1
+	
+	if [[ -n "$2" ]]; then
+		SAVEPATH="/share/CACHEDEV1_DATA/"$2
+	else
+		SAVEPATH="/share/Public"
+	fi
+	echo  "From :"${FILE}
+	echo  "To :"${SAVEPATH}
+
+	sshpass -v -p ${NAS_PASSWD} scp -P ${NAS_SSH_PORT} ${FILE} admin@${NAS_IP}:${SAVEPATH}
+}
+
+function snas(){
+	SSHPASS=${NAS_PASSWD} sshpass -e ssh ${NAS_USER}@${NAS_IP}
+}
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# exports
+
+# GOPATH
+# http://wendyeq.me/2012/12/15/go-and-gae-env/
+#https://blog.gopheracademy.com/advent-2015/vendor-folder/
+# export GO15VENDOREXPERIMENT=1 #n Go 1.6 this will be on by default without an environment variable.
+# export GOBIN=$GOROOT/bin
+# export YOUR_OWN_GOPATH=$HOME/go
+# export GOBIN2=$YOUR_OWN_GOPATH/bin
+# export GAEGO=$HOME/go_appengine
+#export GOPATH=$YOUR_OWN_GOPATH:$YOUR_OWN_GOPATH/bin:/Users/cage/google-cloud-sdk/platform/google_appengine/go_appengine:/usr/local/go/bin
+#export GOPATH=$YOUR_OWN_GOPATH:$GAEGO/goroot  #把GAE的環境變量放在這裡是為了方便使用gocode對GAE的庫進行代碼提示
+# export GOPATH=$YOUR_OWN_GOPATH  #把GAE的環境變量放在這裡是為了方便使用gocode對GAE的庫進行代碼提示
+# export PATH=$PATH:$GOBIN:$GOBIN2:$GAEGO #把GAEGO放到這裡是為了方便使用appcfg.py和dev-server.py工具
+
+# Add appengine go sdk
+# export GOOGLE_CLOUD_SDK=/Users/cage/google-cloud-sdk
+# export GAE_SDK=$GOOGLE_CLOUD_SDK/platform/google_appengine
+# export PATH=$PATH:$GAE_SDK
+
+# Add gitbook ebook convert - calibre
+export CALIBRE_PATH=/Applications/calibre.app/Contents/MacOS
+export PATH=$PATH:$CALIBRE_PATH
+
+# Add Protol Buffers
+export PROTOC_PATH=/Users/cage/protoc-3.3.0-osx-x86_64/bin
+export PATH=$PATH:$PROTOC_PATH
+
+# Add HOMEBREW_GITHUB_API_TOKEN
+export HOMEBREW_GITHUB_API_TOKEN=12578bd1a09de721b57ffb6307edf77585cf6989
+
+# virtualenvwrapper
+# http://virtualenvwrapper.readthedocs.org/en/latest/install.html
+export WORKON_HOME=$HOME/.virtualenvs
+export PROJECT_HOME=$HOME/Devel
+source /usr/local/bin/virtualenvwrapper.sh
+
+# mysql
+# [Installing mysql, MySQLdb on Mac OS X | laurii](http://goo.gl/nOKo1l)
+MYSQL=/usr/local/mysql/bin
+export PATH=$PATH:$MYSQL
+export DYLD_LIBRARY_PATH=/usr/local/mysql/lib:$DYLD_LIBRARY_PATH
+
+#Once PyOpenSSL is installed, you will need to set the CLOUDSDK_PYTHON_SITEPACKAGES environment variable to 1. This environment variable setting tells the Cloud SDK that it should look outside of its own google-cloud-sdk/lib directory for libraries to include. It is generally safe to set CLOUDSDK_PYTHON_SITEPACKAGES=1, but if something stops working you may need to undo it.
+export CLOUDSDK_PYTHON_SITEPACKAGES=1
+
+#deploy
+# export GCLOUD_KEY=$(cat /Users/cage/PycharmProjects/cheerspoint-mail/cage-20160705-edm-dc6ac4472749.json)
+# export GCLOUD_ACCOUNT=gitlab-ci-deploy@cage-20160705-edm.iam.gserviceaccount.com
+# export GCLOUD_SERVICE_JSON_KEY=$(cat /Users/cage/PycharmProjects/cheerspoint-mail/default/cage-20160705-edm-cc07ec5bf115.json)
+# export GCP_PROJECT_VERSION=uat
+
+#
+CHANGELOG_GITHUB_TOKEN="8f1110ce20efac3041c52247760dc4b565e6d465"
+
+# https://github.com/brendangregg/FlameGraph
+# Stack trace visualizer
+export PATH=$PATH:/Users/cage/FlameGraph
+
+# kubernetes
+export KUBECONFIG=$HOME/.kube/config:$HOME/.kube/retail.conf
+
+# skaffold
+export SKAFFOLD_CACHE_ARTIFACTS=true
+
+export PKG_CONFIG_PATH=/usr/lib/pkgconfig
+#------------------------------------------------------------------------------

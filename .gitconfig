@@ -1,17 +1,29 @@
 [alias]
-	c = commit -am
-	fpush = push --force
-	s = status
-	sclone = clone --depth=1
-	amend = commit --amend --all
-	undocommit = reset HEAD~
-	hreset = reset --hard
-	co = checkout
-	df = diff --color --color-words --abbrev
-	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
-	cherrypick = cherry-pick
-	cherry = cherry-pick
-	cp = cherry-pick
+    st = status
+    sts = "status -s"
+    co = checkout
+    br = branch
+    mg = merge
+    ci = commit
+    mdnd = commit --amend --no-edit
+    dt = difftool
+    mt = mergetool
+    last = log -1 HEAD
+    cf = config
+    line = log --oneline
+    re = remote
+    di = diff
+    dif = diff --cached
+    latest = for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short) [%(committername)]'
+    ls = log --pretty=format:'%Cred%h%Creset %Cgreen%ad -%C(bold yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=short
+    hist = log --pretty=format:\"%C(yellow)%h %C(red)%d %C(reset)%s %C(green)[%an] %C(blue)%ad\" --topo-order --graph --date=short
+    type = cat-file -t
+    dump = cat-file -p
+    track = log --pretty=raw --graph
+    ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+    dl = "!git ll -1"
+    dlc = diff --cached HEAD^
+    la = "!git config -l | grep alias | cut -c 7-"
 
 	# Show the diff between the latest commit and the current state
 	d = !"git diff-index --quiet HEAD -- || clear; git --no-pager diff --patch-with-stat"
@@ -96,10 +108,13 @@
     # Show blocks of moved text of at least 20 alphanumeric characters differently than adds/deletes
     # https://blog.github.com/2018-04-05-git-217-released/
     colorMoved = zebra
-[remote "origin"]
-	fetch = +refs/heads/*:refs/remotes/origin/*
+# [remote "origin"]
+	# fetch = +refs/heads/*:refs/remotes/origin/*
 [stash]
 	showPatch = true
 [log]
 	date = relative
 
+[user]
+	name = Kai-Chu Chung
+	email = cage.chung@gmail.com
